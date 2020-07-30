@@ -6,7 +6,7 @@ function sendToSlack(body, channel) {
   var url = "【published URL】";
   var data = { 
     "channel" : channel,
-    "text" : body,
+    "text" : body,  
     "unfurl_links": true,
   };
   var payload = JSON.stringify(data);
@@ -24,8 +24,6 @@ function test() {
 
 function onFormSubmit(e){
 
-  var body = "Slack通知テストフォームが来たよ！\n"; 
-  var applicant = "";
   var itemResponse = e.response.getItemResponses();
   var bodyPublic = "";
 
@@ -33,8 +31,22 @@ function onFormSubmit(e){
     var formData = itemResponse[j];
     var title = formData.getItem().getTitle();
     var response = formData.getResponse();
+    var tags = "";
 
-    bodyPublic += title + "\n" + response + "\n";
+    if(response) {
+      switch(title) {
+        case "■":
+          tags = "■" + response;
+          break;
+        case "P || Q":
+          bodyPublic = "## ▼ " + response + "\n";
+          break;
+        default:
+          bodyPublic += "\n" + title + "\n" + response + "\n";  
+          break;
+      }
+    }
+    bodyPublic += tags
   }
   sendToSlack(bodyPublic, "#from_google_form");
 }
