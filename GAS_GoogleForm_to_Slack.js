@@ -3,7 +3,7 @@ function myFunction() {
 }
 
 function sendToSlack(body, channel) {
-  var url = "https://hooks.slack.com/services/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";
+  var url = "【published URL】";
   var data = { 
     "channel" : channel,
     "text" : body,
