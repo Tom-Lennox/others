@@ -3,7 +3,7 @@ function myFunction() {
 }
 
 function sendToSlack(body, channel) {
-  var url = "【published URL】";
+ var url = "【published URL】";
   var data = { 
     "channel" : channel,
     "text" : body,  
@@ -33,20 +33,23 @@ function onFormSubmit(e){
     var response = formData.getResponse();
     var tags = "";
 
+//    if(response) {
+//      switch(title) {
+//        case "tag":
+//          tags = "■" + response;
+//          break;
+//        case "P || Q":
+//          bodyPublic = "## ▼ " + response + "\n";
+//          break;
+//        default:
+//          bodyPublic += "\n" + title + "\n" + response + "\n";  
+//          break;
+//      }
+//    }
     if(response) {
-      switch(title) {
-        case "■":
-          tags = "■" + response;
-          break;
-        case "P || Q":
-          bodyPublic = "## ▼ " + response + "\n";
-          break;
-        default:
-          bodyPublic += "\n" + title + "\n" + response + "\n";  
-          break;
-      }
+      bodyPublic += title + "\n" + response + "\n\n";  
     }
-    bodyPublic += tags
   }
+  bodyPublic += tags;
   sendToSlack(bodyPublic, "#from_google_form");
 }
