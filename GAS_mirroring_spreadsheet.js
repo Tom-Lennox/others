@@ -28,9 +28,9 @@ function SetOthelloStyle() {
   range.setBackground(CellColor);
   range.setBorder(true, true, true, true, true, true, BorderColor, SpreadsheetApp.BorderStyle.SOLID);
   range.setFontColor(FontColor);
-  range.setFontWeight("bold");
+//   range.setFontWeight("bold");
   range.setWrapStrategy(SpreadsheetApp.WrapStrategy.WRAP);
-//  range.setFontSize(18);
+ range.setFontSize(10);
 }
 
 function SetSort() {
