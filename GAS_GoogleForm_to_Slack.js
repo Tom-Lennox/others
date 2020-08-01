@@ -2,12 +2,9 @@ function myFunction() {
   
 }
 
-// --
-// 適用先：google form
-// 一行説明：google form ⇒ slack通知
-// --
 function sendToSlack(body, channel) {
- var url = "【published URL】";
+  var url = "https://hooks.slack.com/services/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";
+//  var url = "【published URL】";
   var data = { 
     "channel" : channel,
     "text" : body,  
@@ -20,10 +17,6 @@ function sendToSlack(body, channel) {
     "payload" : payload
   };
   var response = UrlFetchApp.fetch(url, options);
-}
-
-function test() {
-  sendToSlack("テスト通知確認です", "#from_google_form");
 }
 
 function onFormSubmit(e){
@@ -51,7 +44,7 @@ function onFormSubmit(e){
 //      }
 //    }
     if(response) {
-      bodyPublic += title + "\n" + response + "\n\n";  
+      bodyPublic += "【" + title + "】" + "\n" + response + "\n\n";  
     }
   }
   bodyPublic += tags;
