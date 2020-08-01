@@ -2,6 +2,10 @@ function myFunction() {
   
 }
 
+// --
+// 適用先：google form
+// 一行説明：google form ⇒ slack通知
+// --
 function sendToSlack(body, channel) {
  var url = "【published URL】";
   var data = { 
@@ -53,3 +57,19 @@ function onFormSubmit(e){
   bodyPublic += tags;
   sendToSlack(bodyPublic, "#from_google_form");
 }
+
+
+// --
+// 適用先：spread sheet
+// 一行説明：背景：黒、文字：白（太字）
+// --
+function SetOthelloStyle() {
+    var sheet=SpreadsheetApp.getActiveSheet();
+    var range=sheet.getRange("A1:AA9999");
+    var CellColor="#000000";
+    var FontColor="#FFFFFF";
+    range.setBackground(CellColor);
+    range.setFontColor(FontColor);
+    range.setFontWeight("bold");
+  //  range.setFontSize(18);
+  }
