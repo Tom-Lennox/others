@@ -3,8 +3,7 @@ function myFunction() {
 }
 
 function sendToSlack(body, channel) {
-  var url = "https://hooks.slack.com/services/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";
-//  var url = "【published URL】";
+  var url = "【published URL】";
   var data = { 
     "channel" : channel,
     "text" : body,  
@@ -23,12 +22,12 @@ function onFormSubmit(e){
 
   var itemResponse = e.response.getItemResponses();
   var bodyPublic = "";
-
+  var tags = "";
+  
   for (var j = 0; j < itemResponse.length; j++){    
     var formData = itemResponse[j];
     var title = formData.getItem().getTitle();
     var response = formData.getResponse();
-    var tags = "";
 
 //    if(response) {
 //      switch(title) {
@@ -44,7 +43,13 @@ function onFormSubmit(e){
 //      }
 //    }
     if(response) {
-      bodyPublic += "【" + title + "】" + "\n" + response + "\n\n";  
+      console.log(j);
+      if(j !== 0) {
+        bodyPublic += response + "\n\n";
+      }else {
+        tags = response;
+        console.log(response);
+      }
     }
   }
   bodyPublic += tags;
