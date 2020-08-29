@@ -3,7 +3,8 @@ function myFunction() {
 }
 
 function sendToSlack(body, channel) {
-  var url = "【published URL】";
+  var url = "https://hooks.slack.com/services/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";
+//  var url = "【published URL】";
   var data = { 
     "channel" : channel,
     "text" : body,  
@@ -43,15 +44,14 @@ function onFormSubmit(e){
 //      }
 //    }
     if(response) {
-      console.log(j);
       if(j !== 0) {
-        bodyPublic += response + "\n\n";
+        bodyPublic += "## ▼ " + response + "\n\n";
       }else {
-        tags = response;
-        console.log(response);
+        tags = "■" + response;
       }
     }
   }
+  bodyPublic = "```\n" + bodyPublic + "\n```\n";
   bodyPublic += tags;
   sendToSlack(bodyPublic, "#from_google_form");
 }
