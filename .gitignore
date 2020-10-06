@@ -1,2 +1,5 @@
 download
 *.xlsx
+
+.env
+node_modules
