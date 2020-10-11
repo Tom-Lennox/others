@@ -16,3 +16,8 @@
 2020/10/07
 
 。postgreSQLの接続（local）
+
+```
+cd 20200925_express_postgresSQL
+node route/index.js
+```
