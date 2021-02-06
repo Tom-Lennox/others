@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+	<div id="app">
+		<v-app>
+			<v-main>
+				<v-container>Hello world</v-container>
+				<v-btn>{{ msg }}</v-btn>
+				<v-row>
+					<v-col
+						cols="6">
+						<v-text-field label="kg" v-model="kg"></v-text-field>
+					</v-col>
+					<v-col
+						cols="6">
+						<v-text-field label="RM" v-model="rm"></v-text-field>
+					</v-col>
+				</v-row>
+				<v-text>calc1Rm: {{ calc1Rm }}</v-text>
+			</v-main>
+			<pre>{{$data}}</pre>
+		</v-app>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+	<script>
+		new Vue({
+			el: '#app',
+			vuetify: new Vuetify(),
+			data: {
+				msg: 'clear',
+				kg: '',
+				rm: ''
+			},
+			computed: {
+				calc1Rm: function() {
+					if(this.kg && this.rm) {
+						return Math.round(this.kg * (1 + (this.rm / 40)) * 100) / 100
+					}
+				}
+			}
+		})
+	</script>
+</body>
+</html>
