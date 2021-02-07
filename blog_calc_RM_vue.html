@@ -10,21 +10,23 @@
 	<div id="app">
 		<v-app>
 			<v-main>
-				<v-container>Hello world</v-container>
-				<v-btn>{{ msg }}</v-btn>
-				<v-row>
-					<v-col
-						cols="6">
-						<v-text-field label="kg" v-model="kg"></v-text-field>
-					</v-col>
-					<v-col
-						cols="6">
-						<v-text-field label="RM" v-model="rm"></v-text-field>
-					</v-col>
-				</v-row>
-				<v-text>calc1Rm: {{ calc1Rm }}</v-text>
+				<v-container>
+					<v-btn @click="around2()">{{ msg }}</v-btn>
+					<v-row>
+						<v-col
+							cols="6">
+							<v-text-field label="kg" v-model="kg"></v-text-field>
+						</v-col>
+						<v-col
+							cols="6">
+							<v-text-field label="RM" v-model="rm"></v-text-field>
+						</v-col>
+					</v-row>
+					<p>calc1Rm: {{ calc1Rm }}</p>
+					<li v-for="ha in has">a:{{ ha.a }} b:{{ ha.b }}</li>
+					<pre>{{$data}}</pre>
+				</v-container>
 			</v-main>
-			<pre>{{$data}}</pre>
 		</v-app>
 	</div>
 
@@ -35,14 +37,47 @@
 			el: '#app',
 			vuetify: new Vuetify(),
 			data: {
-				msg: 'clear',
-				kg: '',
-				rm: ''
+				msg: '近似値',
+				kg: 100,
+				rm: 8,
+				compareWeightList: [],
+				has: []
 			},
 			computed: {
 				calc1Rm: function() {
 					if(this.kg && this.rm) {
 						return Math.round(this.kg * (1 + (this.rm / 40)) * 100) / 100
+					}
+				}
+			},
+			methods: {
+				around: function() {
+					let testWeight = this.kg - 2.5
+					let weightRange = 20
+					for(let i = 0; i < 10; i++) {
+						if(this.calcRm(testWeight, i) > (this.calc1Rm - weightRange)	&& this.calcRm(testWeight, i) < (this.calc1Rm + weightRange))
+						this.has.push({a:this.calcRm(testWeight, i), b: i})
+					}
+				},
+				around2() {
+					let testWeight = this.kg - 2.5
+					let weightRange = 20
+					this.makeCompareWeightList(this.kg)
+					this.compareWeightList.forEach(function(val) {
+						// filterで±2を通すか、if文を使用するか。
+						// forEach必要？
+						//console.log(val.filter(function(val){retutn val > 100}))
+					})
+				},
+				calcRm:(kkg, rrm) => {
+					return Math.round(kkg * (1 + (rrm / 40)) * 100) / 100
+				},
+				makeCompareWeightList(kkg) {
+					for(let i = -4; i <= 4; i++) {
+						let weight = parseInt(kkg) + (2.5 * i)
+						for(let j = 1; j <= 10; j++) {
+							this.compareWeightList.push([weight, j])
+						}
 					}
 				}
 			}
