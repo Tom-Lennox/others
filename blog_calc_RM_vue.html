@@ -11,20 +11,33 @@
 		<v-app>
 			<v-main>
 				<v-container>
-					<v-btn @click="around2()">{{ msg }}</v-btn>
-					<v-row>
+					<v-row justify="center" align-content="center">
 						<v-col
-							cols="6">
-							<v-text-field label="kg" v-model="kg"></v-text-field>
+							cols="12">
+							<v-text-field label="kg" v-model.number="kg" type="number"></v-text-field>
 						</v-col>
 						<v-col
-							cols="6">
-							<v-text-field label="RM" v-model="rm"></v-text-field>
+							cols="12">
+							<v-text-field label="回数" v-model.number="rm" type="number"></v-text-field>
+						</v-col>
+						<v-col
+							cols="12">
+							<p class="font-weight-bold">1RM: {{ calc1Rm }} kg</p>
+						</v-col>
+						<v-col
+							cols="12">
+							<v-btn @click="around()">{{ msg }}</v-btn>
 						</v-col>
 					</v-row>
-					<p>calc1Rm: {{ calc1Rm }}</p>
-					<li v-for="ha in has">a:{{ ha.a }} b:{{ ha.b }}</li>
-					<pre>{{$data}}</pre>
+					<template>
+						<v-data-table
+							:headers="headers"
+							:items="results"
+							:items-per-pages="10"
+							class="elevation-1 mt-10"
+						></v-data-table>
+					</template>
+					<!-- <pre>{{$data}}</pre> -->
 				</v-container>
 			</v-main>
 		</v-app>
@@ -37,11 +50,21 @@
 			el: '#app',
 			vuetify: new Vuetify(),
 			data: {
-				msg: '近似値',
-				kg: 100,
-				rm: 8,
+				msg: '±2kg のセットを表示',
+				kg: '',
+				rm: '',
 				compareWeightList: [],
-				has: []
+				results: [],
+				headers: [
+					{
+						text: '1RM',
+						align: 'start',
+						sortable: true,
+						value: 'oneRm'
+					},
+					{ text: '重量', value: 'weight' },
+					{ text: '回数', value: 'rm' }
+				]
 			},
 			computed: {
 				calc1Rm: function() {
@@ -51,32 +74,24 @@
 				}
 			},
 			methods: {
-				around: function() {
-					let testWeight = this.kg - 2.5
-					let weightRange = 20
-					for(let i = 0; i < 10; i++) {
-						if(this.calcRm(testWeight, i) > (this.calc1Rm - weightRange)	&& this.calcRm(testWeight, i) < (this.calc1Rm + weightRange))
-						this.has.push({a:this.calcRm(testWeight, i), b: i})
-					}
-				},
-				around2() {
-					let testWeight = this.kg - 2.5
-					let weightRange = 20
+				around() {
+					const weightRange = 2
 					this.makeCompareWeightList(this.kg)
-					this.compareWeightList.forEach(function(val) {
-						// filterで±2を通すか、if文を使用するか。
-						// forEach必要？
-						//console.log(val.filter(function(val){retutn val > 100}))
+					this.results = this.compareWeightList.filter((val,index) => {
+						const oneRmNow = this.calc1Rm
+						return (val.oneRm >= oneRmNow - weightRange && val.oneRm <= oneRmNow + weightRange)
 					})
 				},
-				calcRm:(kkg, rrm) => {
-					return Math.round(kkg * (1 + (rrm / 40)) * 100) / 100
+				calcRm:(kg, rm) => {
+					return Math.round(kg * (1 + (rm / 40)) * 100) / 100
 				},
-				makeCompareWeightList(kkg) {
+				makeCompareWeightList(kg) {
 					for(let i = -4; i <= 4; i++) {
-						let weight = parseInt(kkg) + (2.5 * i)
 						for(let j = 1; j <= 10; j++) {
-							this.compareWeightList.push([weight, j])
+							let weight = parseInt(kg) + (2.5 * i)
+							let oneRm = weight
+							if(j !== 1) {oneRm = this.calcRm(weight, j)}
+							this.compareWeightList.push({weight: weight, oneRm: oneRm, rm: j })
 						}
 					}
 				}
