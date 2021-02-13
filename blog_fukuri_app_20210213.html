@@ -11,38 +11,42 @@
 		<v-app>
 			<v-main>
 				<v-container>	 
-						<v-text-field
-							label="yen"
-							v-model.number="yen"
-							type="number"
-							@click="yen = ''"
-						></v-text-field>
-						<v-text-field
-							label="per"
-							v-model.number="per"
-							type="number"
-							@click="per = ''"
-						></v-text-field>
-						<v-text-field
-							label="year"
-							v-model.number="year"
-							type="number"
-								@click="year = ''"
-						></v-text-field>
-						<p class="font-weight-bold">{{ fukuri }}</p>
-						<v-row>
-							<v-col>n年後</v-col>
-							<v-col>元利合計</v-col>
-							<v-col>利息合計</v-col>
-							<v-col>金利</v-col>
-						</v-row>
-						<v-row v-for="result in results">
-							<v-col>{{ result.year }}年後</v-col>
-							<v-col>{{ result.yen | yenComma }} 円</v-col>
-							<v-col>{{ result.risoku | yenComma }} 円</v-col>
-							<v-col>{{ result.kinri }}%</v-col>
-						</v-row>
-					<!-- {{ msg }}<pre>{{$data}}</pre> -->
+					<v-alert
+						border="left"
+						type="success"
+					>{{ msg }}</v-alert>
+					<v-text-field
+						label="yen"
+						v-model.number="yen"
+						type="number"
+						@click="yen = ''"
+					></v-text-field>
+					<v-text-field
+						label="per"
+						v-model.number="per"
+						type="number"
+						@click="per = ''"
+					></v-text-field>
+					<v-text-field
+						label="year"
+						v-model.number="year"
+						type="number"
+							@click="year = ''"
+					></v-text-field>
+					<p class="font-weight-bold">{{ fukuri }}</p>
+					<v-row>
+						<v-col>n年後</v-col>
+						<v-col>元利合計</v-col>
+						<v-col>利息合計</v-col>
+						<v-col>金利</v-col>
+					</v-row>
+					<v-row v-for="result in results">
+						<v-col>{{ result.year }}年後</v-col>
+						<v-col>{{ result.yen | yenComma }} 円</v-col>
+						<v-col>{{ result.risoku | yenComma }} 円</v-col>
+						<v-col>{{ result.kinri }}%</v-col>
+					</v-row>
+					<!-- <pre>{{$data}}</pre> -->
 				</v-container>
 			</v-main>
 		</v-app>
@@ -61,7 +65,7 @@
 				year: 24,
 				results: []
 			},
-      computed: {
+			computed: {
 				fukuri: function() {
 					if(this.yen && this.per && this.year) {
 						let yen = this.yen
