@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+	<div id="app">
+		<v-app>
+			<v-main>
+				<v-container>	 
+						<v-text-field
+							label="yen"
+							v-model.number="yen"
+							type="number"
+							@click="yen = ''"
+						></v-text-field>
+						<v-text-field
+							label="per"
+							v-model.number="per"
+							type="number"
+							@click="per = ''"
+						></v-text-field>
+						<v-text-field
+							label="year"
+							v-model.number="year"
+							type="number"
+								@click="year = ''"
+						></v-text-field>
+						<p class="font-weight-bold">{{ fukuri }}</p>
+						<v-row>
+							<v-col>n年後</v-col>
+							<v-col>元利合計</v-col>
+							<v-col>利息合計</v-col>
+							<v-col>金利</v-col>
+						</v-row>
+						<v-row v-for="result in results">
+							<v-col>{{ result.year }}年後</v-col>
+							<v-col>{{ result.yen | yenComma }} 円</v-col>
+							<v-col>{{ result.risoku | yenComma }} 円</v-col>
+							<v-col>{{ result.kinri }}%</v-col>
+						</v-row>
+					<!-- {{ msg }}<pre>{{$data}}</pre> -->
+				</v-container>
+			</v-main>
+		</v-app>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+	<script>
+		new Vue({
+			el: '#app',
+			vuetify: new Vuetify(),
+			data: {
+				msg: '作業完了時 ⇒ Git保存のこと。',
+				yen: 1000000,
+				per: 3,
+				year: 24,
+				results: []
+			},
+      computed: {
+				fukuri: function() {
+					if(this.yen && this.per && this.year) {
+						let yen = this.yen
+						let per = this.per
+						let year = this.year
+						let risoku = 0
+						let kinri = 0
+						this.results.length = 0
+						for(let i = 0; i <= year; i++) {
+							if (i !== 0) {
+								yen = yen * (100 + per) / 100 
+								yen = Math.round(yen)
+								risoku = (yen - this.yen)
+								kinri = (risoku / this.yen) * 100
+								kinri = Math.round(kinri * 100) / 100
+							}
+							this.results.push({yen: yen, year: i, risoku: risoku, kinri: kinri })
+						}
+					}
+				}
+			},
+ 			filters: {
+				yenComma: function(value) {
+					return value.toLocaleString()
+				}
+			}
+		})
+	</script>
+</body>
+</html>
