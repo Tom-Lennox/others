@@ -31,6 +31,7 @@
 							type="number"
 						></v-text-field>
 						<p class="font-weight-bold">{{ fukuri }}</p>
+            <canvas id="chart"></canvas>
 						<v-row>
 							<v-col>n年後</v-col>
 							<v-col>元利合計</v-col>
@@ -44,7 +45,6 @@
 							<v-col>{{ result.kinri }}%</v-col>
 						</v-row>
 					<!-- <pre>{{$data}}</pre> -->
-					<canvas id="chart"></canvas>
 				</v-container>
 			</v-main>
 		</v-app>
@@ -110,7 +110,7 @@
 							labels: labelList,
 							datasets: [{
 								label: "複利",
-								fill: false,
+                fill: false,
 								backgroundColor: color,
 								data: dataList
 							}]
