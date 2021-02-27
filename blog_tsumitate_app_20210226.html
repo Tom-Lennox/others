@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+	<div id="app">
+		<v-app>
+			<v-main>
+				<v-container>	 
+						<v-alert
+							border="left"
+							type="success"
+						>{{ msg }}</v-alert>
+						<v-text-field
+							label="積立金額"
+							v-model.number="input_regular_investment"
+							type="number"
+						></v-text-field>
+						<v-text-field
+							label="%"
+							v-model.number="input_per"
+							type="number"
+						></v-text-field>
+						<v-text-field
+							label="年数"
+							v-model.number="input_year"
+							type="number"
+						></v-text-field>
+						<p class="font-weight-bold">{{ fukuri }}</p>
+						<canvas id="chart"></canvas>
+						<v-row>
+							<v-col>n年後</v-col>
+							<v-col>元利合計</v-col>
+							<v-col>利息合計</v-col>
+							<v-col>実質金利</v-col>
+						</v-row>
+						<v-row v-for="result in results">
+							<v-col>{{ result.input_year }}年後</v-col>
+							<v-col>{{ result.yen_sum | yenComma }} 円</v-col>
+							<v-col>{{ result.yen_interest | yenComma }} 円</v-col>
+							<v-col>{{ result.real_interest_rate }}%</v-col>
+						</v-row>
+					<!-- <pre>{{$data}}</pre> -->
+				</v-container>
+			</v-main>
+		</v-app>
+	</div>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+<script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.min.js"></script>
+	<script> 
+		new Vue({
+			el: '#app',
+			vuetify: new Vuetify(),
+			data: {
+				msg: '作業完了時 ⇒ Git保存のこと。',
+				input_regular_investment: 1000000,
+				input_per: 5,
+				input_year: 12,
+				results: []
+			},
+			computed: {
+				fukuri: function() {
+					if(this.input_regular_investment && this.input_per && this.input_year) {
+						// input_regular_investment 積立金額（毎年）
+						let input_regular_investment = this.input_regular_investment
+						let input_per = this.input_per
+						let input_year = this.input_year
+						let yen_sum = input_regular_investment
+						let yen_interest_sum = input_regular_investment
+						let yen_interest = 0
+						let real_interest_rate = 0
+						this.results.length = 0
+						for(let i = 1; i <= input_year; i++) {
+							yen_sum = yen_sum * (100 + input_per) / 100
+							yen_sum = Math.round(yen_sum)
+							yen_interest = (yen_sum - yen_interest_sum)
+							real_interest_rate = (yen_interest / yen_interest_sum) * 100
+							real_interest_rate = Math.round(real_interest_rate * 100) / 100
+							this.results.push({
+								yen_sum: yen_sum
+								, input_year: i
+								, yen_interest: yen_interest
+								, real_interest_rate: real_interest_rate
+								, yen_interest_sum: yen_interest_sum
+							})
+							yen_interest_sum += input_regular_investment
+							yen_sum += input_regular_investment
+						}
+					}
+				}
+			},
+			filters: { 
+				yenComma(value) {
+					return value.toLocaleString()
+				}
+			},
+			methods: {
+				listCategoryCreat: function (target) {
+					var targetList = this.results.map(function (arr) {
+						return [arr[target]]
+					})
+					return targetList;
+				},
+				creatChart: function () {
+					let label_list = this.listCategoryCreat('input_year')
+					let yen_sum = this.listCategoryCreat('yen_sum')
+					let yen_interest_sum = this.listCategoryCreat('yen_interest_sum')
+					let yen_sum_color = '#FF0000'
+					let yen_interest_sum_color = '#0000FF'
+
+					config = {
+						type: 'line',
+						data: {
+							labels: label_list,
+							datasets: [{
+								label: "複利",
+								fill: false,
+								backgroundColor: yen_sum_color,
+								data: yen_sum
+							},
+							{
+								label: "積立金額",
+								fill: false,
+								backgroundColor: yen_interest_sum_color,
+								data: yen_interest_sum
+							}]
+						},
+						options: {
+								scales: {
+									xAxes: [{
+										ticks: {}
+									}],
+									yAxes: [{
+										ticks: {
+											callback: function(label, index, labels) { 
+												return label.toLocaleString() + "円"
+											}
+										}
+									}]
+								}
+						}
+					};
+					chart = new Chart(document.getElementById('chart').getContext('2d'), config);
+				}
+			},
+			watch: {
+				results() {
+					this.creatChart();
+				}
+			}
+		})
+	</script>
+</body>
+</html>
