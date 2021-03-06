@@ -11,10 +11,10 @@
 		<v-app>
 			<v-main>
 				<v-container>	 
-					<v-alert
-					border="left"
-					type="success"
-				>{{ msg }}</v-alert>
+					<!-- <v-alert
+						border="left"
+						type="success"
+					>{{ msg }}</v-alert> -->
 					<v-text-field
 							label="積立金額"
 							v-model.number="input_regular_investment"
@@ -146,10 +146,10 @@
 								}
 						}
 					};
-					if(!chart) {
+					if(!chart.data) {
 						chart = new Chart(document.getElementById('chart').getContext('2d'), config)
 					} else {
-						chart.data.datasets = config.data.datasets
+						chart.data = config.data
 						chart.update()
 					}
 				}
