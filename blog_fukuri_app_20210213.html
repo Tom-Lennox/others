@@ -110,7 +110,7 @@
 							labels: labelList,
 							datasets: [{
 								label: "複利",
-                fill: false,
+								fill: false,
 								backgroundColor: color,
 								data: dataList
 							}]
@@ -134,7 +134,12 @@
 								}
 						}
 					};
-					chart = new Chart(document.getElementById('chart').getContext('2d'), config);
+					if(!chart.data) {
+						chart = new Chart(document.getElementById('chart').getContext('2d'), config)
+					} else {
+						chart.data = config.data
+						chart.update()
+					}
 				}
 			},
 			watch: {
