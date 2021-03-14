@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+	<div id="app">
+		<v-app>
+			<v-main>
+				<v-container>	 
+					<!-- <v-alert
+						border="left"
+						type="success"
+					>{{ msg }}</v-alert> -->
+					<v-text-field
+							label="積立金額"
+							v-model.number="inputted_regular_investment"
+							type="number"
+						></v-text-field>
+						<v-text-field
+							label="%"
+							v-model.number="inputted_per"
+							type="number"
+						></v-text-field>
+						<v-text-field
+							label="年数"
+							v-model.number="inputted_year"
+							type="number"
+						></v-text-field>
+						<p class="font-weight-bold">{{ fukuri }}</p>
+						<canvas id="chart"></canvas>
+						<v-row>
+							<v-col cols="3">n年後</v-col>
+							<v-col cols="3">元利合計</v-col>
+							<v-col cols="3">利息合計</v-col>
+							<v-col cols="3">実質金利</v-col>
+						</v-row>
+						<v-row v-for="result in results">
+							<v-col cols="3" v-if="result.investment_period_month === 0">（開始月）（{{ result.investment_period_month }}ヶ月目）</v-col>
+							<v-col cols="3" v-else>{{ result.year }}年目（{{ result.investment_period_month }}ヶ月目）</v-col>
+							<v-col cols="3">{{ result.total_investments | yenComma }} 円</v-col>
+							<v-col cols="3">{{ result.yen_interest | yenComma }} 円</v-col>
+							<v-col cols="3">{{ result.real_interest_rate }}%</v-col>
+						</v-row>
+					<pre>{{$data}}</pre>
+				</v-container>
+			</v-main>
+		</v-app>
+	</div>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+<script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.min.js"></script>
+	<script> 
+		new Vue({
+			el: '#app',
+			vuetify: new Vuetify(),
+			data: {
+				msg: '作業完了時 ⇒ Git保存のこと。',
+				inputted_regular_investment: 100,
+				inputted_per: 12,
+				inputted_year: 2,
+				results: [],
+				per_year_results: []
+			},
+			computed: {
+                // ## ▼ やること
+                // 20年積立、20年目から売却とする。
+                // グラフ、文字で表示するもの
+                    // 積立金額
+                    // 売却金額
+                    // 非課税金額
+                    // 非課税に対しての実質得した譲渡所得課税金額（20.315%）
+                // 20y ⇒ 240ヶ月としてobjを作成する。
+				fukuri: function() {
+					if(this.inputted_regular_investment && this.inputted_per && this.inputted_year) {
+						// inputted_regular_investment 積立金額（毎年）
+						const inputted_regular_investment = this.inputted_regular_investment
+						const inputted_per = this.inputted_per
+						const inputted_year = this.inputted_year
+                        const investment_period_month = inputted_year * 12
+                        const interest_rate_per_month = Math.round((inputted_per / 12) * 10000) / 10000
+						let year = 0
+						let total_investments = inputted_regular_investment
+						let yen_interest_sum = inputted_regular_investment
+						let yen_interest = 0
+						let real_interest_rate = 0
+						this.results.length = 0
+						// 作成　月次
+						for(let i = 0; i < investment_period_month; i++) {
+							year = Math.floor(i / 12)
+							this.results.push({
+								total_investments: total_investments
+								, year: year
+								, investment_period_month: i
+								, yen_interest: yen_interest
+								, real_interest_rate: real_interest_rate
+								, yen_interest_sum: yen_interest_sum
+							})
+						}
+						// 作成　年次
+						for(let i = 0; i < inputted_year; i++) {
+							this.per_year_results.push({
+								total_investments: 0
+								, year: i
+								, yen_interest: 0
+								, real_interest_rate: 0
+								, yen_interest_sum: 0
+							})
+						}
+						// 操作
+						this.results.forEach((e) => {
+							// 月次
+							let interest_cycle = investment_period_month - e.investment_period_month - 1
+							for(let i = 0; i < interest_cycle; i++) {
+								e.total_investments = Math.round(e.total_investments * (100 + interest_rate_per_month) / 100)
+							}
+							// 年次
+							this.per_year_results.forEach((e2) => {
+								if(e.year === e2.year) {
+									e2.total_investments += e.total_investments
+									e2.yen_interest += e.total_investments - inputted_regular_investment
+								}
+							})
+						})
+
+					}
+				}
+			},
+			filters: { 
+				yenComma(value) {
+					return value.toLocaleString()
+				}
+			},
+			methods: {
+				listCategoryCreat: function (target) {
+					var targetList = this.per_year_results.map(function (arr) {
+						return [arr[target]]
+					})
+					return targetList;
+				},
+				creatChart: function () {
+					let label_list = this.listCategoryCreat('year')
+					let total_investments = this.listCategoryCreat('total_investments')
+					let yen_interest_sum = this.listCategoryCreat('yen_interest')
+					let total_investments_color = '#FF0000'
+					let yen_interest_sum_color = '#0000FF'
+
+					config = {
+						type: 'line',
+						data: {
+							labels: label_list,
+							datasets: [{
+								label: "複利",
+								fill: false,
+								backgroundColor: total_investments_color,
+								data: total_investments
+							},
+							{
+								label: "積立金額",
+								fill: false,
+								backgroundColor: yen_interest_sum_color,
+								data: yen_interest_sum
+							}]
+						},
+						options: {
+							scales: {
+								xAxes: [{
+									ticks: {}
+								}],
+								yAxes: [{
+									ticks: {
+										callback: function(label, index, labels) { 
+											return label.toLocaleString() + "円"
+										}
+									}
+								}]
+							}
+						}
+					};
+					if(!chart.data) {
+						chart = new Chart(document.getElementById('chart').getContext('2d'), config)
+					} else {
+						chart.data = config.data
+						chart.update()
+					}
+				}
+			},
+			watch: {
+				results() {
+					this.creatChart();
+				}
+			}
+		})
+	</script>
+</body>
+</html>
