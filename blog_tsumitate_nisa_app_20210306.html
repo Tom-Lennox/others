@@ -148,6 +148,8 @@
 						this.per_year_results.forEach((year_arr) => {
 							this.total_investments_all_period += year_arr.investment_period_year
 							year_arr.total_investments_year = this.total_investments_all_period
+							this.yen_interest_sum_all_period += year_arr.yen_interest
+							year_arr.total_interest_year = this.yen_interest_sum_all_period
 						})
 					}
 				}
@@ -169,9 +171,11 @@
 					let investment_period_year = this.listCategoryCreat('investment_period_year')
 					let yen_interest_sum = this.listCategoryCreat('yen_interest')
 					let total_investments_year = this.listCategoryCreat('total_investments_year')
+					let total_interest_year = this.listCategoryCreat('total_interest_year')
 					let total_investments_color = '#FF0000'
 					let yen_interest_sum_color = '#0000FF'
 					let total_investments_year_color = '#0000FF'
+					let total_interest_year_color = '#0000FF'
 
 					config = {
 						type: 'line',
@@ -194,6 +198,12 @@
 								fill: false,
 								backgroundColor: total_investments_year_color,
 								data: total_investments_year
+							},
+							{
+								label: "利息総額",
+								fill: false,
+								backgroundColor: total_interest_year_color,
+								data: total_interest_year
 							}]
 						},
 						options: {
