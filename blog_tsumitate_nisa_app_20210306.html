@@ -19,33 +19,35 @@
 							label="積立金額"
 							v-model.number="inputted_regular_investment"
 							type="number"
-						></v-text-field>
-						<v-text-field
-							label="%"
-							v-model.number="inputted_per"
-							type="number"
-						></v-text-field>
-						<v-text-field
-							label="年数"
-							v-model.number="inputted_year"
-							type="number"
-						></v-text-field>
-						<p class="font-weight-bold">{{ fukuri }}</p>
-						<canvas id="chart"></canvas>
-						<v-row>
-							<v-col cols="3">n年後</v-col>
-							<v-col cols="3">元利合計</v-col>
-							<v-col cols="3">利息合計</v-col>
-							<v-col cols="3">実質金利</v-col>
-						</v-row>
-						<v-row v-for="result in results">
-							<v-col cols="3" v-if="result.investment_period_month === 0">（開始月）（{{ result.investment_period_month }}ヶ月目）</v-col>
-							<v-col cols="3" v-else>{{ result.year }}年目（{{ result.investment_period_month }}ヶ月目）</v-col>
-							<v-col cols="3">{{ result.total_investments | yenComma }} 円</v-col>
-							<v-col cols="3">{{ result.yen_interest | yenComma }} 円</v-col>
-							<v-col cols="3">{{ result.real_interest_rate }}%</v-col>
-						</v-row>
+					></v-text-field>
+					<v-text-field
+						label="%"
+						v-model.number="inputted_per"
+						type="number"
+					></v-text-field>
+					<v-text-field
+						label="年数"
+						v-model.number="inputted_year"
+						type="number"
+					></v-text-field>
+					<p class="font-weight-bold">{{ fukuri }}</p>
+					<canvas id="chart"></canvas>
+					<p>月利率：　{{ interest_rate_per_month }} % *12={{ interest_rate_per_month*12 }}</p>
+					<p>月投資金額：　{{ inputted_regular_investment_month }} 円 *12={{ inputted_regular_investment_month*12 }}</p>
+					<v-row>
+						<v-col cols="3">n年後</v-col>
+						<v-col cols="3">元利合計</v-col>
+						<v-col cols="3">利息合計</v-col>
+						<v-col cols="3">実質金利</v-col>
+					</v-row>
+					<v-row v-for="per_year_result in per_year_results">
+						<v-col cols="3">{{ per_year_result.year }}年目</v-col>
+						<v-col cols="3">{{ per_year_result.investment_period_year | yenComma }} 円</v-col>
+						<v-col cols="3">{{ per_year_result.yen_interest | yenComma }} 円</v-col>
+						<v-col cols="3">{{ per_year_result.real_interest_rate }}%</v-col>
+					</v-row>
 					<pre>{{$data}}</pre>
+					<!-- <pre>{{$data.per_year_results}}</pre> -->
 				</v-container>
 			</v-main>
 		</v-app>
@@ -60,11 +62,15 @@
 			vuetify: new Vuetify(),
 			data: {
 				msg: '作業完了時 ⇒ Git保存のこと。',
-				inputted_regular_investment: 100,
-				inputted_per: 12,
-				inputted_year: 2,
+				inputted_regular_investment: 10000,
+				inputted_per: 6,
+				inputted_year: 12,
+				interest_rate_per_month: 0,
+				inputted_regular_investment_month: 0,
+				total_investments_all_period: 0,
+				yen_interest_sum_all_period: 0,
 				results: [],
-				per_year_results: []
+				per_year_results: [],
 			},
 			computed: {
                 // ## ▼ やること
@@ -83,17 +89,27 @@
 						const inputted_year = this.inputted_year
                         const investment_period_month = inputted_year * 12
                         const interest_rate_per_month = Math.round((inputted_per / 12) * 10000) / 10000
+						const inputted_regular_investment_month = Math.round(inputted_regular_investment / 12)
+						// 表示用
+						this.interest_rate_per_month = interest_rate_per_month
+						this.inputted_regular_investment_month = inputted_regular_investment_month
+						// console.log("interest_rate_per_month: % ", interest_rate_per_month)
+						// console.log("inputted_regular_investment_month: ", inputted_regular_investment_month)
 						let year = 0
-						let total_investments = inputted_regular_investment
-						let yen_interest_sum = inputted_regular_investment
+						let total_investments_month = inputted_regular_investment_month
+						let yen_interest_sum = 0
 						let yen_interest = 0
 						let real_interest_rate = 0
 						this.results.length = 0
+						this.per_year_results.length = 0
+						// let total_investments_all_period = 0
+						// let yen_interest_sum_all_period = 0
+
 						// 作成　月次
 						for(let i = 0; i < investment_period_month; i++) {
 							year = Math.floor(i / 12)
 							this.results.push({
-								total_investments: total_investments
+								total_investments_month: total_investments_month
 								, year: year
 								, investment_period_month: i
 								, yen_interest: yen_interest
@@ -104,11 +120,13 @@
 						// 作成　年次
 						for(let i = 0; i < inputted_year; i++) {
 							this.per_year_results.push({
-								total_investments: 0
+								investment_period_year: 0
 								, year: i
 								, yen_interest: 0
 								, real_interest_rate: 0
 								, yen_interest_sum: 0
+								, total_investments_year: 0
+								, total_interest_year: 0
 							})
 						}
 						// 操作
@@ -116,17 +134,21 @@
 							// 月次
 							let interest_cycle = investment_period_month - e.investment_period_month - 1
 							for(let i = 0; i < interest_cycle; i++) {
-								e.total_investments = Math.round(e.total_investments * (100 + interest_rate_per_month) / 100)
+								e.total_investments_month = Math.round(e.total_investments_month * (100 + interest_rate_per_month) / 100)
 							}
+							e.yen_interest_sum = e.total_investments_month - inputted_regular_investment_month
 							// 年次
 							this.per_year_results.forEach((e2) => {
 								if(e.year === e2.year) {
-									e2.total_investments += e.total_investments
-									e2.yen_interest += e.total_investments - inputted_regular_investment
+									e2.investment_period_year += e.total_investments_month
+									e2.yen_interest += e.total_investments_month - inputted_regular_investment_month
 								}
 							})
 						})
-
+						this.per_year_results.forEach((year_arr) => {
+							this.total_investments_all_period += year_arr.investment_period_year
+							year_arr.total_investments_year = this.total_investments_all_period
+						})
 					}
 				}
 			},
@@ -144,26 +166,34 @@
 				},
 				creatChart: function () {
 					let label_list = this.listCategoryCreat('year')
-					let total_investments = this.listCategoryCreat('total_investments')
+					let investment_period_year = this.listCategoryCreat('investment_period_year')
 					let yen_interest_sum = this.listCategoryCreat('yen_interest')
+					let total_investments_year = this.listCategoryCreat('total_investments_year')
 					let total_investments_color = '#FF0000'
 					let yen_interest_sum_color = '#0000FF'
+					let total_investments_year_color = '#0000FF'
 
 					config = {
 						type: 'line',
 						data: {
 							labels: label_list,
 							datasets: [{
-								label: "複利",
+								label: "積立金額",
 								fill: false,
 								backgroundColor: total_investments_color,
-								data: total_investments
+								data: investment_period_year
 							},
 							{
-								label: "積立金額",
+								label: "利息",
 								fill: false,
 								backgroundColor: yen_interest_sum_color,
 								data: yen_interest_sum
+							},
+							{
+								label: "積立総額",
+								fill: false,
+								backgroundColor: total_investments_year_color,
+								data: total_investments_year
 							}]
 						},
 						options: {
